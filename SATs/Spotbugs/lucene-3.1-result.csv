@@ -1,0 +1,13 @@
+filename,test-release,line_number,SAT_prediction_result,Priority
+lucene_src_java_org_apache_lucene_store_FSDirectory.java,lucene-3.1,460,True,2
+lucene_contrib_queryparser_src_java_org_apache_lucene_queryParser_core_nodes_QueryNodeImpl.java,lucene-3.1,153,True,2
+lucene_contrib_queryparser_src_java_org_apache_lucene_queryParser_core_nodes_QueryNodeImpl.java,lucene-3.1,214,True,2
+lucene_contrib_queryparser_src_java_org_apache_lucene_queryParser_core_nodes_QueryNodeImpl.java,lucene-3.1,272,True,2
+lucene_src_java_org_apache_lucene_store_Directory.java,lucene-3.1,175,True,2
+lucene_src_java_org_apache_lucene_store_Directory.java,lucene-3.1,186,True,2
+lucene_src_java_org_apache_lucene_util_AttributeSource.java,lucene-3.1,123,True,2
+lucene_src_java_org_apache_lucene_store_FSDirectory.java,lucene-3.1,282,True,2
+lucene_src_java_org_apache_lucene_store_FSDirectory.java,lucene-3.1,374,True,1
+lucene_src_java_org_apache_lucene_store_FSDirectory.java,lucene-3.1,154,True,2
+lucene_contrib_xml-query-parser_src_java_org_apache_lucene_xmlparser_builders_UserInputQueryBuilder.java,lucene-3.1,51,True,2
+lucene_contrib_xml-query-parser_src_java_org_apache_lucene_xmlparser_builders_UserInputQueryBuilder.java,lucene-3.1,47,True,2

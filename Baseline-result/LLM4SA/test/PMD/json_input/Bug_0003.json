@@ -1,0 +1,18 @@
+{
+    "line": 116,
+    "column": 15,
+    "procedure": "",
+    "file": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+    "bug_type": "DoNotUseThreads",
+    "qualifier": {
+        "PMD": "To be compliant to J2EE, a webapp should not use any thread."
+    },
+    "Trace": [
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 116,
+            "column_number": 15,
+            "description": "To be compliant to J2EE, a webapp should not use any thread."
+        }
+    ]
+}

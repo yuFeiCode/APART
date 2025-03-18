@@ -1,0 +1,48 @@
+{
+    "line": 101,
+    "column": 171,
+    "procedure": "",
+    "file": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+    "bug_type": "ExcessiveClassLength",
+    "qualifier": {
+        "PMD": "Avoid really long classes."
+    },
+    "Trace": [
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 101,
+            "column_number": 8,
+            "description": "Avoid really long classes."
+        },
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 101,
+            "column_number": 8,
+            "description": "Possible God Class (WMC=276, ATFD=123, TCC=3.354%)"
+        },
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 101,
+            "column_number": 8,
+            "description": "The class 'ActiveMQConnection' has a total cyclomatic complexity of 276 (highest 13)."
+        },
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 101,
+            "column_number": 8,
+            "description": "This class has a bunch of public methods and attributes"
+        },
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 101,
+            "column_number": 171,
+            "description": "This class has too many methods, consider refactoring it."
+        },
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 101,
+            "column_number": 171,
+            "description": "Too many fields"
+        }
+    ]
+}

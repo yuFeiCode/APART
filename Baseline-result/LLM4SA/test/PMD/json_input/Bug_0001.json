@@ -1,0 +1,24 @@
+{
+    "line": 17,
+    "column": 1,
+    "procedure": "",
+    "file": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+    "bug_type": "ExcessiveImports",
+    "qualifier": {
+        "PMD": "A high number of imports can indicate a high degree of coupling within an object."
+    },
+    "Trace": [
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 17,
+            "column_number": 1,
+            "description": "A high number of imports can indicate a high degree of coupling within an object."
+        },
+        {
+            "filename": "activemq-core_src_main_java_org_apache_activemq_ActiveMQConnection.java",
+            "line_number": 17,
+            "column_number": 1,
+            "description": "High amount of different objects as members denotes a high coupling"
+        }
+    ]
+}
