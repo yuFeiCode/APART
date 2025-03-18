@@ -1,6 +1,4 @@
-# 2024-07-13 ngram linedp 以及 deeplinedp都是左连接，这与原来的GLANCE不一样，这里尝试进行新的代码更待
 
-# 2024-8-02 新增LLM4SA-PMD效果
 library(tidyverse)
 library(gridExtra)
 library(lattice)
@@ -31,7 +29,6 @@ linedp.result.dir = "D:/Gitee-code/Boosting deep line-level defect prediction wi
 n.gram.result.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/n_gram_result/"
 
 
-# dir.create(file.path(save.fig.dir), showWarnings = FALSE)
 
 preprocess <- function(x, reverse){
   colnames(x) <- c("variable","value")
@@ -80,14 +77,11 @@ for(f in all_files)
 
 ##############
 line.ground.truth = select(df_all,  project, train, test, filename, file.level.ground.truth, prediction.prob, line.number, line.level.ground.truth, is.comment.line)
-line.ground.truth = filter(line.ground.truth, is.comment.line== "False")  #2024-05-17: 获取所有文件中的行级ground-truth标签
+line.ground.truth = filter(line.ground.truth, is.comment.line== "False")  
 line.ground.truth = distinct(line.ground.truth)
 
 
 
-# （2）针对有actionable警告的文件/项目进行分析，看看F和G增强的排序是否有效  2024-07-07
-
-###2023-10-30 用GLANCE_MD生成的，设置为file_threshold=1和line_threshold=1，得到代码行级的CE和NFC信息，用于SPLICE的排序计算
 CEandNFCdir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/Glance_MD_full_threshold_2024_05_14_add_NT_output/line_result/test/"
 
 all_CEandNF_files = list.files(CEandNFCdir)
@@ -108,36 +102,30 @@ lineLevelMetrics$filename <- gsub("/", "_", lineLevelMetrics$filename)
 
 get.line.metrics.result = function(baseline.df, cur.df.file)
 {
-  # 2024-07-07 只针对actionable warning的文件（项目级的）
+
   baseline.df.with.ground.truth = merge(baseline.df, cur.df.file, by=c("filename", "line.number"))
   
-  # 2024-07-07 只针对actionable warning的文件
+
   baseline.df.with.ground.truth = baseline.df.with.ground.truth %>% group_by(filename) %>%
     mutate(actionable.warning = ifelse(any(line.level.ground.truth == 'True'), 1, 0)) %>% 
     filter(actionable.warning == 1)
   
   
-  ## 同一文件内的行为一组，按line.score从大到小降序排列；每一组内独立编号order
+
   sorted = baseline.df.with.ground.truth %>% group_by(filename) %>% arrange(rank, .by_group = TRUE) %>% mutate(order = row_number())%>% mutate(totalSLOC = n())
-  # warning.files = select(sorted,filename) %>% distinct() %>% nrow()
+
   
   
-  
-  #2024-05-17: 只分析警告行数大于等于10的文件，太少了失去排序的意义
+
   sorted = sorted %>% filter(totalSLOC >= 5) 
   filter.files = sorted %>% select(filename) %>% distinct()
-  # 记录filter.files的行数
-  # number <- nrow(filter.files)
-  # print(paste0(' filter files is ',number))
-  
-  ##统计每个有缺陷的文件中包含多少个有缺陷的代码行
+
   total_true = sorted %>%  group_by(filename) %>% summarize(total_true = sum(line.level.ground.truth == "True"))
   
-  ##glance的预测结果中包含file.level.ground.truth == "FALSE"的文件，
-  ##为使用DeepLineDP使用的性能指标，这些文件需要排除掉
+
   total_true = total_true %>% filter(total_true > 0)
   
-  # 2024-07-09 FPavg：找到一个TP前平均审查的假警告数目
+
   FPavg = sorted %>% group_by(filename) %>% mutate(FPI = cumsum(line.level.ground.truth == "False"), total_truth = sum(line.level.ground.truth == "True")) %>% 
     filter(line.level.ground.truth == "True") %>% mutate(S.R = sum(FPI, na.rm = TRUE)) %>% mutate(FPavg = round( S.R / total_truth, digits = 2)) %>% 
     select(filename,FPavg) %>% distinct()
@@ -146,19 +134,19 @@ get.line.metrics.result = function(baseline.df, cur.df.file)
   
   FPavg.list = FPavg$FPavg
   
-  ## IFA:  每个文件一个IFA，在每个文件的行组中取order最低的行号，代表检查到第一个有缺陷的行时需要检查多少行
+
   IFA = sorted %>% filter(line.level.ground.truth == "True") %>% group_by(filename)  %>% top_n(1, -order)
-  ## added 2023-09-16 确保按文件名排序
+
   IFA = IFA%>% arrange(filename)
   
-  ## 注意要减1，第一个有缺陷语句前面的clean语句行数
+
   ifa.list = IFA$order - 1
   
-  ## added 2023-09-16 确保按文件名排序
+
   total_true = total_true%>% arrange(filename)
   
   
-  #added 2023-10-30, FPA：fault-percentile-average
+
   fpa = sorted %>% merge(total_true) %>% group_by(filename) %>% arrange(order, .by_group=TRUE) %>% mutate(lineFPA = if_else    (line.level.ground.truth == 'True',  n()-order+1, 0 ) / (n() * total_true)) %>% summarize(FPA = sum(lineFPA) )
   fpa = fpa %>% arrange(filename)
   fpa.list = fpa$FPA
@@ -180,27 +168,23 @@ get.line.metrics.result = function(baseline.df, cur.df.file)
   return(result.df)
 }
 
-# 计算14个release的中位值，并将数值放在最后一行
+
 add_median_row <- function(df) {
-  # 选择除第一列和最后一列外的所有列
+
   numeric_columns <- sapply(df[, 2:(ncol(df) - 1)], is.numeric)
   
-  # 计算这些列的中位数
+
   medians <- apply(df[, 2:(ncol(df) - 1)][, numeric_columns], 2, median, na.rm = TRUE)
   
-  # 创建一个与原数据框相同长度的向量，并将中位数添加到相应列中
   new_row <- rep(NA, ncol(df))
   new_row[2:(ncol(df) - 1)][numeric_columns] <- medians
   
-  # 将最后一列的值设置为原来的值
+
   new_row[ncol(df)] <- tail(df[, ncol(df)], n = 1)
   
-  # 将新行添加到数据框
+
   df <- rbind(df, new_row)
-  
-  # 可选：给最后一行设置行名，例如 "Median"
-  # rownames(df)[nrow(df)] <- "Median"
-  
+
   return(df)
 }
 
@@ -229,12 +213,12 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
     cur.df.file = select(cur.df.file, filename, line.number, line.level.ground.truth)
     cur.df.file$filename <- gsub("/", "_", cur.df.file$filename)
     
-    # 分别处理各个不同的工具
+
     # PMD
     if (SATname != "CheckStyle" ){
       names(allSATresult) = c('filename','test.release','line_number', 'SAT_prediction_result', 'Priority')
       allSATresult$SAT_prediction_result <- ifelse(allSATresult$SAT_prediction_result %in% c("False", "FALSE"), 0, 1)
-      allSATresult = allSATresult %>% filter(SAT_prediction_result == 1)      #2024-05-17: 只保留有警告的那些行做后续分析
+      allSATresult = allSATresult %>% filter(SAT_prediction_result == 1)      
     }
     
     if (SATname == "CheckStyle"){
@@ -242,27 +226,26 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
       names(allSATresult) = c('filename', 'line_number', 'Priority')
     }
     
-    #静态分析工具的自然排序
+
     SAT.result = allSATresult %>% group_by(filename) %>% arrange(Priority, line_number, .by_group = TRUE) %>% mutate(rank = row_number())
     SAT.result = select(SAT.result,'filename','line_number','rank')
     names(SAT.result) = c('filename','line.number','rank')
     
-    # 任何工具都需要SAT最原始的priority信息
+
     SAT.base.info = select(allSATresult, filename, line_number, Priority)
     names(SAT.base.info) = c('filename','line.number','Priority')
     
-    # 用到的NFC NT信息
+
     NFC_and_NT_info = lineLevelMetrics %>% filter(test == rel) %>% select(filename, line.number, NT, NFC)
     
     
-    # 只用SAT的自然序 + NT 做排序
     SAT_NT.result = SAT.base.info
     SAT_NT.result = left_join(SAT_NT.result, NFC_and_NT_info, by=c('filename', 'line.number'))%>% mutate(
       NT = replace_na(NT, 0))
     SAT_NT.result = SAT_NT.result %>% group_by(filename) %>% arrange(-NT, Priority, line.number, .by_group = TRUE) %>% mutate(rank = row_number()) %>% ungroup()
     SAT_NT.result = select(SAT_NT.result, filename, line.number, rank)
     
-    # 只用SAT的自然序 + NFC 做排序
+
     SAT_NFC.result = SAT.base.info
     SAT_NFC.result = left_join(SAT_NFC.result, NFC_and_NT_info, by=c('filename', 'line.number'))%>% mutate(
       NFC = replace_na(NFC, 0))
@@ -270,7 +253,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
     SAT_NFC.result = select(SAT_NFC.result, filename, line.number, rank)
     
     
-    #用NFC*NT增强的排序
+
     SAT_F.result = SAT.base.info
     SAT_F.result = left_join(SAT_F.result, NFC_and_NT_info, by=c('filename', 'line.number')) %>% mutate(
       NT = replace_na(NT, 0),
@@ -278,8 +261,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
     SAT_F.result = SAT_F.result %>% group_by(filename) %>% arrange(-NFC*NT, Priority, line.number, .by_group = TRUE) %>% mutate(rank = row_number()) %>% ungroup()
     SAT_F.result = select(SAT_F.result, filename, line.number, rank)
     
-    # 2024-07-07 只针对actionable warning的文件（项目级的）
-    ##"%>% mutate(test=rel)" 确保记录下每个target project的名称
+
     SAT.eval.result = get.line.metrics.result(SAT.result, cur.df.file) %>% mutate(test=rel)
     SAT_NT.eval.result = get.line.metrics.result(SAT_NT.result, cur.df.file) %>% mutate(test=rel)
     SAT_NFC.eval.result = get.line.metrics.result(SAT_NFC.result, cur.df.file) %>% mutate(test=rel)
@@ -296,7 +278,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
     print(paste0('finished ', rel))
   }
   
-  # 2024-07-07 只针对actionable warning的文件（项目级的）
+
   sum_SAT.result.df = SAT.result.df %>% summarise( IFA=median(ifa.list), fpa=median(fpa.list), top1=mean(top1.list), top3=mean(top3.list), top5=mean(top5.list), FPavg = median(FPavg.list), .by=test)
   sum_SAT_NT.result.df = SAT_NT.result.df %>% summarise( IFA=median(ifa.list), fpa=median(fpa.list), top1=mean(top1.list), top3=mean(top3.list), top5=mean(top5.list), FPavg = median(FPavg.list), .by=test)
   sum_SAT_NFC.result.df = SAT_NFC.result.df %>% summarise( IFA=median(ifa.list), fpa=median(fpa.list), top1=mean(top1.list), top3=mean(top3.list), top5=mean(top5.list), FPavg = median(FPavg.list), .by=test)
@@ -314,7 +296,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
   
   dataframes <- list(sum_SAT.result.df, sum_SAT_NT.result.df, sum_SAT_NFC.result.df, sum_SAT_F.result.df)
   
-  # 取14个release上中位值
+
   sum_SAT.result.df = add_median_row(sum_SAT.result.df)
   sum_SAT_NT.result.df  = add_median_row(sum_SAT_NT.result.df)
   sum_SAT_NFC.result.df  = add_median_row(sum_SAT_NFC.result.df)
@@ -343,7 +325,7 @@ all_eval_releases = c('activemq-5.2.0','activemq-5.3.0','activemq-5.8.0',
                       'jruby-1.5.0','jruby-1.7.0.preview1',
                       'lucene-3.0.0','lucene-3.1','wicket-1.5.3')
 
-# RQ4 八个工具的总体柱状图
+
 ALL.SAT.RQ4.median.result = NULL
 ALL.SAT_NT.RQ4.median.result = NULL
 ALL.SAT_NFC.RQ4.median.result = NULL

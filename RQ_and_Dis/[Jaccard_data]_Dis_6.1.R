@@ -1,6 +1,4 @@
-# 2024-11-06 在topk下，对每个工具，计算：
-#（1）两个方法A和B的相似度： |A(topk) 交 B(topk)| / |A(topk) 并 B(topk)| ；
-#（2）|所有方法topk的交|/|所有方法topk的并|。结果放到一个csv文件中，k考虑1和3两个值。
+
 library(tidyverse)
 library(gridExtra)
 library(lattice)
@@ -33,7 +31,7 @@ sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)a
 linedp.result.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/MIT-LineDP-update/line_result/test/"
 n.gram.result.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/n_gram_result/"
 
-# 2024-08-02 新增加LLM4SA-PMD的结果
+
 LLM_PMD.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/PMD/'
 LLM_CheckStyle.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/CheckStyle/'
 LLM_ErrorProne.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Errorprone/'
@@ -44,8 +42,7 @@ LLM_Codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Codeq
 LLM_Sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Sonarqube/'
 
 
-# Dis.figures.path.top1 = 'D:/Gitee-code/enhance_SATs/figures/(2024-10-22)Dis_figures/Dis_6.1_figures/top1_sets/'
-# Dis.figures.path.top3 = 'D:/Gitee-code/enhance_SATs/figures/(2024-10-22)Dis_figures/Dis_6.1_figures/top3_sets/'
+
 Dis.figures.path.top1 = 'D:/Gitee-code/enhance_SATs/figures/(2025-01-26update)新加入GLANCE-LR对比/Dis_6.1_figures/top1_sets/'
 Dis.figures.path.top3 = 'D:/Gitee-code/enhance_SATs/figures/(2025-01-26update)新加入GLANCE-LR对比/Dis_6.1_figures/top3_sets/'
 
@@ -93,8 +90,8 @@ for(f in all_files)
   df <- read.csv(paste0(prediction_dir, f))
   df_all <- rbind(df_all, df)
 }
-########### deeplinedp 增强的排序 #######
-# deeplinedp 增强的排序
+########### deeplinedp  #######
+
 deeplinedp.result = df_all
 deeplinedp.result[deeplinedp.result$is.comment.line == "True",]$token.attention.score = 0
 tmp.top.k = get.top.k.tokens(deeplinedp.result, 1500)
@@ -115,9 +112,7 @@ line.ground.truth = distinct(line.ground.truth)
 
 
 
-# （2）针对有actionable警告的文件/项目进行分析，看看F和G增强的排序是否有效  2024-07-07
 
-###2023-10-30 用GLANCE_MD生成的，设置为file_threshold=1和line_threshold=1，得到代码行级的CE和NFC信息，用于SPLICE的排序计算
 CEandNFCdir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/Glance_MD_full_threshold_2024_10_25_add_NT_output/line_result/test/"
 
 all_CEandNF_files = list.files(CEandNFCdir)
@@ -136,8 +131,7 @@ names(lineLevelMetrics) = c("filename", "line.number", "GLANCEscore", "rank", "N
 lineLevelMetrics$filename = str_split_fixed(lineLevelMetrics$filename, ":", 2)[,1]
 lineLevelMetrics$filename <- gsub("/", "_", lineLevelMetrics$filename)
 
-#######2024-01-28 GLANCE-LR line-threshold=0.5 二级缺陷预测应该和DeepLineDP流程一样，要考虑到文件级分类器的影响，只有
-#######被预测为有缺陷的文件，才会统计这些文件的CE NT NFC
+
 GLANCE_LR.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/BASE-Glance-LR(line_threshold=0.5)/line_result/test/"
 
 GLANCE_LR_files = list.files(GLANCE_LR.dir)
@@ -160,26 +154,24 @@ GLANCE_LR_Metric$filename <- gsub("/", "_", GLANCE_LR_Metric$filename)
 ####################################################################################
 get.top.N.TP = function(baseline.df, cur.df.file, N, test)
 {
-  # 2024-07-07 只针对actionable warning的文件（项目级的）
+
   baseline.df.with.ground.truth = merge(baseline.df, cur.df.file, by=c("filename", "line.number"))
   
-  # 2024-07-07 只针对actionable warning的文件
+
   baseline.df.with.ground.truth = baseline.df.with.ground.truth %>% group_by(filename) %>%
     mutate(actionable.warning = ifelse(any(line.level.ground.truth == 'True'), 1, 0)) %>% 
     filter(actionable.warning == 1)
   
   
-  ## 同一文件内的行为一组，按line.score从大到小降序排列；每一组内独立编号order
+
   sorted = baseline.df.with.ground.truth %>% group_by(filename) %>% arrange(rank, .by_group = TRUE) %>% mutate(order = row_number())%>% mutate(totalSLOC = n())
   
-  #2024-05-17: 只分析警告行数大于等于10的文件，太少了失去排序的意义
+
   sorted = sorted %>% filter(totalSLOC >= 5) 
   
-  # 计算每个文件的top 20%阈值
-  # sorted = sorted %>% group_by(filename) %>% mutate(threshold = floor(totalSLOC * 0.2))
+
   
   top.N.TP = sorted %>% group_by(filename) %>% filter(order <= N)
-  # top.N.TP = sorted %>% group_by(filename) %>% filter(order <= threshold & line.level.ground.truth == "True")
   top.N.TP = top.N.TP %>% mutate(element = paste0(test, "/", filename, "/", line.number)) %>% ungroup()
   top.N.TP = top.N.TP %>% select(element)
   
@@ -216,7 +208,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
     cur.df.file = select(cur.df.file, filename, line.number, line.level.ground.truth)
     cur.df.file$filename <- gsub("/", "_", cur.df.file$filename)
     
-    # 分别处理各个不同的工具
+
     # PMD
     if (SATname != "CheckStyle" ){
       names(allSATresult) = c('filename','test.release','line_number', 'SAT_prediction_result', 'Priority')
@@ -229,16 +221,16 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
       names(allSATresult) = c('filename', 'line_number', 'Priority')
     }
     
-    #静态分析工具的自然排序
+
     SAT.result = allSATresult %>% group_by(filename) %>% arrange(Priority, line_number, .by_group = TRUE) %>% mutate(rank = row_number())
     SAT.result = select(SAT.result,'filename','line_number','rank')
     names(SAT.result) = c('filename','line.number','rank')
     
-    # 任何工具都需要SAT最原始的priority信息
+
     SAT.base.info = select(allSATresult, filename, line_number, Priority)
     names(SAT.base.info) = c('filename','line.number','Priority')
     
-    #用GLANCE增强的排序
+
     SAT_G.result = SAT.base.info
     GLANCE_G = select(lineLevelMetrics, test, filename, line.number, GLANCEscore, CE)%>% filter(test == rel)
     GLANCE_G = select(GLANCE_G, filename, line.number, GLANCEscore, CE)
@@ -250,7 +242,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
     SAT_G.result = SAT_G.result %>% group_by(filename) %>% arrange(-CE, -GLANCEscore, Priority,  line.number, .by_group = TRUE) %>% mutate(rank = row_number()) %>% ungroup()
     SAT_G.result = select(SAT_G.result, filename, line.number, rank)
     
-    #用NFC*NT增强的排序
+
     SAT_F.result = SAT.base.info
     GLANCE_F = select(lineLevelMetrics, test, filename, line.number, NT, NFC) %>% filter(test == rel)
     GLANCE_F = select(GLANCE_F, filename, line.number, NT, NFC)
@@ -318,12 +310,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
     SAT_deeplinedp.result = SAT_deeplinedp.result %>% group_by(filename) %>% arrange(-deeplinedp.score, line.number, .by_group = TRUE) %>% mutate(rank = row_number()) %>% ungroup()
     SAT_deeplinedp.result = select(SAT_deeplinedp.result, filename, line.number, rank)
     
-    
-    # LLS4SA 
-    # LLM4SA每一份文件中按照real bug, false alarm, unknow的结果分别设置优先级为3,2,1，
-    # 对于优先级别相同的行，按照自然顺序排序（例如line 3 and line 5的优先级都为3，则排序的时候还是保持line 3 在 line 5 的前面）
-    # 排好序之后计算相应的指标
-    # real > false > unknown 的效果更好
+
     LLM4SA = read.csv(paste0(LLM.result.dir,rel,'-line-lvl-result.txt'),quote="")
     LLM4SA = LLM4SA %>% mutate(Priority = case_when(
       PMD_prediction_result == 'real bug' ~ 3,
@@ -339,8 +326,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
     SAT_LLM4SA.result = select(SAT_LLM4SA.result, filename, line.number, rank)
     
     
-    
-    # 2024-07-07 只针对actionable warning的文件（项目级的）
+
     # top n(n=1/3)
     SAT.eval.result = get.top.N.TP(SAT.result, cur.df.file, top_n, rel) 
     SAT_F.eval.result = get.top.N.TP(SAT_F.result, cur.df.file, top_n, rel) 
@@ -369,7 +355,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
   SAT_deeplinedp.result.df = select(SAT_deeplinedp.result.df, element)
   SAT_LLM4SA.result.df = select(SAT_LLM4SA.result.df, element)
   
-  # 将所有工具的结果放入一个列表中
+
   all_tools_results <- list(
     SAT.result.df,
     SAT_F.result.df, 
@@ -382,17 +368,16 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
   
   
   
-  # 提取每个工具的唯一元素，并命名
+
   tool_elements <- lapply(all_tools_results, function(df) unique(df$element))
   names(tool_elements) <- c("SAT", "APART-F", "GLANCE-LR" ,"N-gram", "LineDP", "DeepLineDP", "LLM4SA")
   
-  # 初始化相似度矩阵
+
   n_tools <- length(tool_elements)
   similarity_matrix <- matrix(0, nrow=n_tools, ncol=n_tools)
   rownames(similarity_matrix) <- names(tool_elements)
   colnames(similarity_matrix) <- names(tool_elements)
-  
-  # 创建数据框来存储成对比较的详细信息
+
   pairwise_results <- data.frame(
     Tool1 = character(),
     Tool2 = character(),
@@ -401,25 +386,25 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
     Similarity = numeric(),
     stringsAsFactors = FALSE
   )
-  # 计算每对工具之间的相似度
+
   for(i in 1:n_tools) {
     for(j in 1:n_tools) {
-      if(i < j) {  # 只计算上三角矩阵
+      if(i < j) {  
         set_i <- tool_elements[[i]]
         set_j <- tool_elements[[j]]
         
-        # 计算交集和并集
+
         intersection_set <- intersect(set_i, set_j)
         union_set <- union(set_i, set_j)
         
-        # 计算交集和并集的大小
+
         intersection_size <- length(intersection_set)
         union_size <- length(union_set)
         
-        # 计算相似度
+
         similarity <- intersection_size / union_size
         
-        # 将结果添加到数据框中
+
         pairwise_results <- rbind(pairwise_results, data.frame(
           Tool1 = names(tool_elements)[i],
           Tool2 = names(tool_elements)[j],
@@ -440,12 +425,12 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
   
   write.csv(pairwise_results, file = paste0(Dis.result.dir, SATname, '/', SATname, '_pairwise_results.csv'))
   
-  # 计算所有工具之间的总体相似度
-  all_intersection <- Reduce(intersect, tool_elements)  # 计算所有工具的交集
-  all_union <- Reduce(union, tool_elements)  # 计算所有工具的并集
-  overall_similarity <- length(all_intersection) / length(all_union)  # 计算总体相似度
+
+  all_intersection <- Reduce(intersect, tool_elements) 
+  all_union <- Reduce(union, tool_elements)
+  overall_similarity <- length(all_intersection) / length(all_union)  
   
-  # 创建包含总体相似度的数据框
+
   overall_result <- data.frame(
     Metric = "Overall_Similarity",
     Value = overall_similarity

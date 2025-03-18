@@ -30,7 +30,7 @@ codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-
 sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/sonarqube/'
 
 
-# dis.save.fig.dir = 'D:/Gitee-code/enhance_SATs/figures/(2024-10-22)Dis_figures/'
+
 dis.save.fig.dir = 'D:/Gitee-code/enhance_SATs/figures/(2025-01-26update)新加入GLANCE-LR对比/Dis_6.2_figures/'
 
 preprocess <- function(x, reverse){
@@ -72,9 +72,6 @@ line.ground.truth = distinct(line.ground.truth)
 
 
 
-# （2）针对有actionable警告的文件/项目进行分析，看看F和G增强的排序是否有效  2024-07-07
-
-###2023-10-30 用GLANCE_MD生成的，设置为file_threshold=1和line_threshold=1，得到代码行级的CE和NFC信息，用于SPLICE的排序计算
 CEandNFCdir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/Glance_MD_full_threshold_2024_05_14_add_NT_output/line_result/test/"
 
 all_CEandNF_files = list.files(CEandNFCdir)
@@ -95,7 +92,6 @@ lineLevelMetrics$filename <- gsub("/", "_", lineLevelMetrics$filename)
 
 
 
-# Define normalization function
 normalize <- function(x) {
   min_x <- min(x)
   max_x <- max(x)
@@ -105,18 +101,18 @@ normalize <- function(x) {
   return((x - min_x) / (max_x - min_x))
 }
 
-# 定义 AUC 计算函数
+
 calculate_auc <- function(response, predictor) {
-  # 首先检查 predictor 是否只有一个类别
+
   if (length(unique(predictor)) == 1) {
-    return(0.5)  # predictor 只有一个类别时返回 0.5
+    return(0.5)  
   }
   
   if (length(unique(response)) == 2) {
-    # 二分类情况
+
     return(as.numeric(auc(roc(response, predictor))))
   } else {
-    # 多分类情况
+
     return(as.numeric(multiclass.roc(response, predictor)$auc))
   }
 }
@@ -142,53 +138,45 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
     cur.df.file = select(cur.df.file, filename, line.number, line.level.ground.truth)
     cur.df.file$filename <- gsub("/", "_", cur.df.file$filename)
     
-    # 分别处理各个不同的工具
+
     # PMD
     if (SATname != "CheckStyle" ){
       names(allSATresult) = c('filename','test.release','line_number', 'SAT_prediction_result', 'Priority')
       allSATresult$SAT_prediction_result <- ifelse(allSATresult$SAT_prediction_result %in% c("False", "FALSE"), 0, 1)
-      allSATresult = allSATresult %>% filter(SAT_prediction_result == 1)      #2024-05-17: 只保留有警告的那些行做后续分析
-    }
+      allSATresult = allSATresult %>% filter(SAT_prediction_result == 1)    
     
     if (SATname == "CheckStyle"){
       allSATresult = select(allSATresult, filename, line, priority)
       names(allSATresult) = c('filename', 'line_number', 'Priority')
     }
     
-    #静态分析工具的自然排序
+
     SAT.result = allSATresult %>% group_by(filename) %>% arrange(Priority, line_number, .by_group = TRUE) %>% mutate(rank = row_number())
     SAT.result = select(SAT.result,'filename','line_number','rank')
     names(SAT.result) = c('filename','line.number','rank')
     
-    # 任何工具都需要SAT最原始的priority信息
+
     SAT.base.info = select(allSATresult, filename, line_number, Priority)
     names(SAT.base.info) = c('filename','line.number','Priority')
     
     
-    #用NFC*NT增强的排序
+
     SAT_F.result = SAT.base.info
-    #  不做归一化
-    # GLANCE_F = lineLevelMetrics %>% filter(test == rel) %>% group_by(filename) %>% mutate(severity = NFC*NT)
-    # 做归一化
+
     GLANCE_F = lineLevelMetrics %>% filter(test == rel) %>% group_by(filename) %>% mutate(severity = NFC*NT) %>% mutate(severity_normalized = normalize(severity))
     
     GLANCE_F = select(GLANCE_F, filename, line.number, severity_normalized)
-    # SAT_F.result = left_join(SAT_F.result, GLANCE_F, by=c('filename', 'line.number'))
-    # SAT_F.result = filter(SAT_F.result, !is.na(severity))
-    # 先试一下 NA行直接将severity为0
+
     SAT_F.result = left_join(SAT_F.result, GLANCE_F, by=c('filename', 'line.number')) %>% mutate(
       severity_normalized = replace_na(severity_normalized, 0))
     
     SAT_F.result = left_join(SAT_F.result, cur.df.file, by = c("filename","line.number"))
     SAT_F.result = filter(SAT_F.result, !is.na(line.level.ground.truth))
   
-    # 首先进行筛选,就是能算AUC的文件起码要满足俩个条件：
-    # 1. priority的类别要>=2
-    # 2. line.level.ground.truth的类别要 =2
+
     filtered.SAT_F.result <- SAT_F.result %>% group_by(filename) %>% filter(n_distinct(line.level.ground.truth) == 2) %>% ungroup()
     
-    ######################## 不做归一化的处理 ####################
-    # 计算 AUC
+
     No_nor <- filtered.SAT_F.result %>% group_by(filename) %>% summarize(
         gt_levels = n_distinct(line.level.ground.truth),
         SAT_levels = n_distinct(Priority),
@@ -204,26 +192,16 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
       ) %>%
       ungroup() %>% 
       mutate(test = rel)
-    # AUC 可能用不了 计算一下somersD = 2 * ( AUC - 0.5 )
+
     No_nor = No_nor %>% mutate(somersD_SAT = 2*(auc_SAT -0.5)) %>% mutate(somersD_SAT_F = 2*(auc_SAT_F -0.5))
-    # SAT_F.result = SAT_F.result %>% mutate(test = rel) %>% select(filename, test) %>% distinct()
+
     all.release.result = rbind(all.release.result, No_nor)
     
     print(paste0('finished ', rel))
   }
-  # P-value and Effect size 文件级
-  # print('#####################[ File-level ]########################')
-  # print('[ File-level ] P-value:')
-  # print(wilcox.test(all.release.result$auc_SAT, all.release.result$auc_SAT_F, paired = TRUE))
-  # print('[ File-level ] Effect size:')
-  # z = wilcoxonZ(all.release.result$auc_SAT, all.release.result$auc_SAT_F, paired = TRUE )
-  # print(z /sqrt(nrow(all.release.result)))
   
-  # 未归一化
-  # sum.no.nor.result = all.release.result %>% summarise(auc_SAT = median(auc_SAT), auc_SAT_F = median(auc_SAT_F), .by=test)
-  # sum.no.nor.result = all.release.result %>% summarise(auc_SAT = mean(auc_SAT), auc_SAT_F = mean(auc_SAT_F), .by=test)
   sum.no.nor.result = all.release.result %>% summarise(somersD_SAT = mean(somersD_SAT), somersD_SAT_F = mean(somersD_SAT_F), .by=test)
-  # P-value and Effect size 版本级
+
   print('#####################[ Release-level ]########################')
   print('[ Release-level ] P-value:')
   print(wilcox.test(sum.no.nor.result$somersD_SAT_F, sum.no.nor.result$somersD_SAT,  paired = TRUE))
@@ -232,10 +210,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
   print(z /sqrt(nrow(sum.no.nor.result)))
   
   
-  # 为散点图收集数据
-  # sandian.figure.path = paste0(dis.save.fig.dir, SATname,'_AUC_data.csv')
-  # write.csv(sum.no.nor.result, file = sandian.figure.path)
-  
+
 }
 
 
@@ -248,7 +223,7 @@ all_eval_releases = c('activemq-5.2.0','activemq-5.3.0','activemq-5.8.0',
                       'jruby-1.5.0','jruby-1.7.0.preview1',
                       'lucene-3.0.0','lucene-3.1','wicket-1.5.3')
 
-# 八个工具在未归一化上的总结果
+
 nor.total.result = NULL
 
 get.SAT.result.only.for.actionable.warning(all_eval_releases, PMD.result.dir, "PMD", line.ground.truth, lineLevelMetrics, save.fig.dir, 20, 15)
