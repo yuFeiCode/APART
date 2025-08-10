@@ -19,19 +19,18 @@ library(effsize)
 library(ggpubr)
 library(rcompanion)
 
-PMD.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/PMD/'
-CheckStyle.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/CheckStyle/'
-ErrorProne.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Errorprone/test/'
-Spotbugs.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Spotbugs/'
+PMD.result.dir = '../SATs/PMD/'
+CheckStyle.result.dir = '../SATs/CheckStyle/'
+ErrorProne.result.dir = '../SATs/Errorprone/'
+Spotbugs.result.dir = '../SATs/Spotbugs/'
 
-betterscan_ce.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/betterscan-ce/'
-codacy.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codacy/'
-codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codeql/'
-sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/sonarqube/'
+betterscan_ce.result.dir = '../SATs/betterscan-ce/'
+codacy.result.dir = '../SATs/codacy/'
+codeql.result.dir = '../SATs/codeql/'
+sonarqube.result.dir = '../SATs/sonarqube/'
 
 
-
-dis.save.fig.dir = 'D:/Gitee-code/enhance_SATs/figures/(2025-01-26update)新加入GLANCE-LR对比/Dis_6.2_figures/'
+dis.save.fig.dir = './Dis_6.2_figures/'
 
 preprocess <- function(x, reverse){
   colnames(x) <- c("variable","value")
@@ -54,7 +53,7 @@ preprocess <- function(x, reverse){
   return(x)
 }
 
-prediction_dir = 'D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/within-release/'
+prediction_dir = '../Baseline-result/DeepLineDP/within-release/'
 
 all_files = list.files(prediction_dir)
 
@@ -67,12 +66,12 @@ for(f in all_files)
 }
 ##############
 line.ground.truth = select(df_all,  project, train, test, filename, file.level.ground.truth, prediction.prob, line.number, line.level.ground.truth, is.comment.line)
-line.ground.truth = filter(line.ground.truth, is.comment.line== "False")  #2024-05-17: 获取所有文件中的行级ground-truth标签
+line.ground.truth = filter(line.ground.truth, is.comment.line== "False")  
 line.ground.truth = distinct(line.ground.truth)
 
 
 
-CEandNFCdir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/Glance_MD_full_threshold_2024_05_14_add_NT_output/line_result/test/"
+CEandNFCdir = "../Baseline-result/GLANCE_and_LineDP/Glance_MD_full_threshold/line_result/test/"
 
 all_CEandNF_files = list.files(CEandNFCdir)
 

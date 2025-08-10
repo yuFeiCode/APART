@@ -1,4 +1,3 @@
-
 library(tidyverse)
 library(gridExtra)
 library(lattice)
@@ -17,33 +16,33 @@ library(grid)
 library(ComplexHeatmap)
 library(grid)
 
-PMD.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/PMD/'
-CheckStyle.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/CheckStyle/'
-ErrorProne.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Errorprone/test/'
-Spotbugs.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Spotbugs/'
+PMD.result.dir = '../SATs/PMD/'
+CheckStyle.result.dir = '../SATs/CheckStyle/'
+ErrorProne.result.dir = '../SATs/Errorprone/'
+Spotbugs.result.dir = '../SATs/Spotbugs/'
 
-betterscan_ce.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/betterscan-ce/'
-codacy.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codacy/'
-codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codeql/'
-sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/sonarqube/'
-
-
-linedp.result.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/MIT-LineDP-update/line_result/test/"
-n.gram.result.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/n_gram_result/"
-
-# 2024-08-02 新增加LLM4SA-PMD的结果
-LLM_PMD.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/PMD/'
-LLM_CheckStyle.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/CheckStyle/'
-LLM_ErrorProne.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Errorprone/'
-LLM_Spotbugs.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Spotbugs/'
-LLM_Codacy.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Codacy/'
-LLM_Betterscan_ce.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Betterscan-ce/'
-LLM_Codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Codeql/'
-LLM_Sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Sonarqube/'
+betterscan_ce.result.dir = '../SATs/betterscan-ce/'
+codacy.result.dir = '../SATs/codacy/'
+codeql.result.dir = '../SATs/codeql/'
+sonarqube.result.dir = '../SATs/sonarqube/'
 
 
-Dis.figures.path.top1 = 'D:/Gitee-code/enhance_SATs/figures/(2025-01-26update)新加入GLANCE-LR对比/Dis_6.1_figures/top1_sets/'
-Dis.figures.path.top3 = 'D:/Gitee-code/enhance_SATs/figures/(2025-01-26update)新加入GLANCE-LR对比/Dis_6.1_figures/top3_sets/'
+linedp.result.dir = "../Baseline-result/GLANCE_and_LineDP/MIT-LineDP-result/line_result/test/"
+n.gram.result.dir = "../Baseline-result/ngram/n_gram_result/"
+
+# unzip Baseline-result/LLM4SA/test SATs result
+LLM_PMD.result.dir = '../Baseline-result/LLM4SA/test/PMD/'
+LLM_CheckStyle.result.dir = '../Baseline-result/LLM4SA/test/CheckStyle/'
+LLM_ErrorProne.result.dir = '../Baseline-result/LLM4SA/test/Errorprone/'
+LLM_Spotbugs.result.dir = '../Baseline-result/LLM4SA/test/Spotbugs/'
+LLM_Codacy.result.dir = '../Baseline-result/LLM4SA/test/Codacy/'
+LLM_Betterscan_ce.result.dir = '../Baseline-result/LLM4SA/test/Betterscan-ce/'
+LLM_Codeql.result.dir = '../Baseline-result/LLM4SA/test/Codeql/'
+LLM_Sonarqube.result.dir = '../Baseline-result/LLM4SA/test/Sonarqube/'
+
+
+Dis.figures.path.top1 = './Dis_6.1_figures/top1_sets/'
+Dis.figures.path.top3 = './Dis_6.1_figures/top3_sets/'
 
 preprocess <- function(x, reverse){
   colnames(x) <- c("variable","value")
@@ -77,7 +76,7 @@ get.top.k.tokens = function(df, k)
   return(top.k)
 }
 
-prediction_dir = 'D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/within-release/'
+prediction_dir = '../Baseline-result/DeepLineDP/within-release/'
 
 
 all_files = list.files(prediction_dir)
@@ -112,7 +111,7 @@ line.ground.truth = distinct(line.ground.truth)
 
 
 ###2023-10-30 用GLANCE_MD生成的，设置为file_threshold=1和line_threshold=1，得到代码行级的CE和NFC信息
-CEandNFCdir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/Glance_MD_full_threshold_2024_10_25_add_NT_output/line_result/test/"
+CEandNFCdir = "../Baseline-result/GLANCE_and_LineDP/Glance_MD_full_threshold/line_result/test/"
 
 all_CEandNF_files = list.files(CEandNFCdir)
 
@@ -131,7 +130,7 @@ lineLevelMetrics$filename = str_split_fixed(lineLevelMetrics$filename, ":", 2)[,
 lineLevelMetrics$filename <- gsub("/", "_", lineLevelMetrics$filename)
 
 
-GLANCE_LR.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/BASE-Glance-LR(line_threshold=0.5)/line_result/test/"
+GLANCE_LR.dir = "../Baseline-result/GLANCE_and_LineDP/BASE-Glance-LR/line_result/test/"
 
 GLANCE_LR_files = list.files(GLANCE_LR.dir)
 
@@ -211,7 +210,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, LLM.res
     if (SATname != "CheckStyle" ){
       names(allSATresult) = c('filename','test.release','line_number', 'SAT_prediction_result', 'Priority')
       allSATresult$SAT_prediction_result <- ifelse(allSATresult$SAT_prediction_result %in% c("False", "FALSE"), 0, 1)
-      allSATresult = allSATresult %>% filter(SAT_prediction_result == 1)      #2024-05-17: 只保留有警告的那些行做后续分析
+      allSATresult = allSATresult %>% filter(SAT_prediction_result == 1)     
     }
     
     if (SATname == "CheckStyle"){

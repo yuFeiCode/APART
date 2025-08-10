@@ -14,28 +14,28 @@ library(dplyr)
 library(tibble)
 library(stringr)
 
-PMD.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/PMD/'
-CheckStyle.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/CheckStyle/'
-ErrorProne.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Errorprone/test/'
-Spotbugs.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Spotbugs/'
+PMD.result.dir = '../SATs/PMD/'
+CheckStyle.result.dir = '../SATs/CheckStyle/'
+ErrorProne.result.dir = '../SATs/Errorprone/'
+Spotbugs.result.dir = '../SATs/Spotbugs/'
 
-betterscan_ce.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/betterscan-ce/'
-codacy.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codacy/'
-codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codeql/'
-sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/sonarqube/'
+betterscan_ce.result.dir = '../SATs/betterscan-ce/'
+codacy.result.dir = '../SATs/codacy/'
+codeql.result.dir = '../SATs/codeql/'
+sonarqube.result.dir = '../SATs/sonarqube/'
+
+# unzip Baseline-result/LLM4SA/test SATs result
+LLM_PMD.result.dir = '../Baseline-result/LLM4SA/test/PMD/'
+LLM_CheckStyle.result.dir = '../Baseline-result/LLM4SA/test/CheckStyle/'
+LLM_ErrorProne.result.dir = '../Baseline-result/LLM4SA/test/Errorprone/'
+LLM_Spotbugs.result.dir = '../Baseline-result/LLM4SA/test/Spotbugs/'
+LLM_Codacy.result.dir = '../Baseline-result/LLM4SA/test/Codacy/'
+LLM_Betterscan_ce.result.dir = '../Baseline-result/LLM4SA/test/Betterscan-ce/'
+LLM_Codeql.result.dir = '../Baseline-result/LLM4SA/test/Codeql/'
+LLM_Sonarqube.result.dir = '../Baseline-result/LLM4SA/test/Sonarqube/'
 
 
-LLM_PMD.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/PMD/'
-LLM_CheckStyle.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/CheckStyle/'
-LLM_ErrorProne.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Errorprone/'
-LLM_Spotbugs.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Spotbugs/'
-LLM_Codacy.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Codacy/'
-LLM_Betterscan_ce.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Betterscan-ce/'
-LLM_Codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Codeql/'
-LLM_Sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/LLM4SA/Sonarqube/'
-
-
-RQ3.save.fig.dir = 'D:/Gitee-code/enhance_SATs/figures/(2025-02-07)保持RQ1-RQ3的图片大小一致/RQ3_figures/'
+RQ3.save.fig.dir = './RQ3_figures/'
 
 
 preprocess <- function(x, reverse){
@@ -84,7 +84,7 @@ for(f in all_files)
 
 
 line.ground.truth = select(df_all,  project, train, test, filename, file.level.ground.truth, prediction.prob, line.number, line.level.ground.truth, is.comment.line)
-line.ground.truth = filter(line.ground.truth, is.comment.line== "False")  #2024-05-17: 获取所有文件中的行级ground-truth标签
+line.ground.truth = filter(line.ground.truth, is.comment.line== "False")  
 line.ground.truth = distinct(line.ground.truth)
 
 all_eval_releases = c('activemq-5.2.0', 'activemq-5.3.0', 'activemq-5.8.0',

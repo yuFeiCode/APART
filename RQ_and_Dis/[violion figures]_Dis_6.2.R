@@ -18,19 +18,18 @@ library(grid)
 library(effsize)
 library(ggpubr)
 
-PMD.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/PMD/'
-CheckStyle.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/CheckStyle/'
-ErrorProne.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Errorprone/test/'
-Spotbugs.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Spotbugs/'
+PMD.result.dir = '../SATs/PMD/'
+CheckStyle.result.dir = '../SATs/CheckStyle/'
+ErrorProne.result.dir = '../SATs/Errorprone/'
+Spotbugs.result.dir = '../SATs/Spotbugs/'
 
-betterscan_ce.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/betterscan-ce/'
-codacy.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codacy/'
-codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codeql/'
-sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/sonarqube/'
+betterscan_ce.result.dir = '../SATs/betterscan-ce/'
+codacy.result.dir = '../SATs/codacy/'
+codeql.result.dir = '../SATs/codeql/'
+sonarqube.result.dir = '../SATs/sonarqube/'
 
 
-
-dis.save.fig.dir = 'D:/Gitee-code/enhance_SATs/figures/(2024-10-22)Dis_figures/'
+dis.save.fig.dir = './(2024-10-22)Dis_figures/'
 
 
 preprocess <- function(x, reverse){
@@ -55,7 +54,7 @@ preprocess <- function(x, reverse){
   return(x)
 }
 
-prediction_dir = 'D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/within-release/'
+prediction_dir = '../Baseline-result/DeepLineDP/within-release/'
 
 all_files = list.files(prediction_dir)
 
@@ -73,7 +72,7 @@ line.ground.truth = distinct(line.ground.truth)
 
 
 
-CEandNFCdir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/Glance_MD_full_threshold_2024_05_14_add_NT_output/line_result/test/"
+CEandNFCdir = "../Baseline-result/GLANCE_and_LineDP/Glance_MD_full_threshold/line_result/test/"
 
 all_CEandNF_files = list.files(CEandNFCdir)
 
@@ -143,7 +142,7 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
     if (SATname != "CheckStyle" ){
       names(allSATresult) = c('filename','test.release','line_number', 'SAT_prediction_result', 'Priority')
       allSATresult$SAT_prediction_result <- ifelse(allSATresult$SAT_prediction_result %in% c("False", "FALSE"), 0, 1)
-      allSATresult = allSATresult %>% filter(SAT_prediction_result == 1)      #2024-05-17: 只保留有警告的那些行做后续分析
+      allSATresult = allSATresult %>% filter(SAT_prediction_result == 1)      
     }
     
     if (SATname == "CheckStyle"){
@@ -236,7 +235,7 @@ chazhi_box = ggplot(nor.total.result, aes(x=tool, y=Difference)) +
   theme_minimal() +
   labs(x="Tool", y="Difference (D_SAT_F - D_SAT)") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ggsave("D:/Gitee-code/enhance_SATs/figures/(2024-10-22)Dis_figures/（版本级 平均值 somer D）box_plot.png", plot = chazhi_box, width = 10, height = 6, dpi = 300)
+ggsave("./(2024-10-22)Dis_figures/（版本级 平均值 somer D）box_plot.png", plot = chazhi_box, width = 10, height = 6, dpi = 300)
 
 
 chazhi_violin_box = ggplot(nor.total.result, aes(x=tool, y=Difference, fill=tool)) +
@@ -249,7 +248,7 @@ chazhi_violin_box = ggplot(nor.total.result, aes(x=tool, y=Difference, fill=tool
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size=9, face="bold"),
         legend.position="none",
         axis.title.y = element_text(margin = margin(r = 20))) # 增加Y轴标签的右边距
-ggsave("D:/Gitee-code/enhance_SATs/figures/(2024-10-22)Dis_figures/（版本级 平均值 somer D）violin_plot.png", plot = chazhi_violin_box, width = 10, height = 6, dpi = 300)
+ggsave("./(2024-10-22)Dis_figures/（版本级 平均值 somer D）violin_plot.png", plot = chazhi_violin_box, width = 10, height = 6, dpi = 300)
 
 
 
@@ -262,5 +261,5 @@ chazhi_violin_box = ggplot(nor.total.result, aes(x=tool, y=Difference)) +
   theme_minimal() +
   labs(x="Tool", y="Difference (D_SAT_F - D_SAT)") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ggsave("D:/Gitee-code/enhance_SATs/figures/(2024-10-22)Dis_figures/（版本级 平均值 somer D）violin_plot.png", plot = chazhi_violin_box, width = 10, height = 6, dpi = 300)
+ggsave("./(2024-10-22)Dis_figures/（版本级 平均值 somer D）violin_plot.png", plot = chazhi_violin_box, width = 10, height = 6, dpi = 300)
 

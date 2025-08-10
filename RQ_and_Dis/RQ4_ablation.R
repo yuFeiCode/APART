@@ -14,21 +14,21 @@ library(dplyr)
 library(tibble)
 library(stringr)
 
-PMD.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/PMD/'
-CheckStyle.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/CheckStyle/'
-ErrorProne.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Errorprone/test/'
-Spotbugs.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/Spotbugs/'
+PMD.result.dir = '../SATs/PMD/'
+CheckStyle.result.dir = '../SATs/CheckStyle/'
+ErrorProne.result.dir = '../SATs/Errorprone/'
+Spotbugs.result.dir = '../SATs/Spotbugs/'
 
-betterscan_ce.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/betterscan-ce/'
-codacy.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codacy/'
-codeql.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/codeql/'
-sonarqube.result.dir = 'D:/Gitee-code/enhance_SATs/SAT_tool_result/(2024-10-21)add-priority-for-SAT(除了PMD之外，prority越小，代表优先级越高)/sonarqube/'
+betterscan_ce.result.dir = '../SATs/betterscan-ce/'
+codacy.result.dir = '../SATs/codacy/'
+codeql.result.dir = '../SATs/codeql/'
+sonarqube.result.dir = '../SATs/sonarqube/'
 
 
-linedp.result.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/MIT-LineDP-update/line_result/test/"
-n.gram.result.dir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/n_gram_result/"
+linedp.result.dir = "../Baseline-result/GLANCE_and_LineDP/MIT-LineDP-result/line_result/test/"
+n.gram.result.dir = "../Baseline-result/ngram/n_gram_result/"
 
-RQ4.save.fig.dir = 'D:/Gitee-code/enhance_SATs/figures/(2024-10-19)RQ4_figures/'
+RQ4.save.fig.dir = './(2024-10-19)RQ4_figures/'
 
 
 preprocess <- function(x, reverse){
@@ -63,8 +63,7 @@ get.top.k.tokens = function(df, k)
 }
 
 
-prediction_dir = 'D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/within-release/'
-
+prediction_dir = '../Baseline-result/DeepLineDP/within-release/'
 
 all_files = list.files(prediction_dir)
 
@@ -84,7 +83,7 @@ line.ground.truth = distinct(line.ground.truth)
 
 
 
-CEandNFCdir = "D:/Gitee-code/Boosting deep line-level defect prediction with syntactic features/all_models_result/Glance_MD_full_threshold_2024_05_14_add_NT_output/line_result/test/"
+CEandNFCdir = "../Baseline-result/GLANCE_and_LineDP/Glance_MD_full_threshold/line_result/test/"
 
 all_CEandNF_files = list.files(CEandNFCdir)
 
@@ -167,33 +166,6 @@ get.line.metrics.result = function(baseline.df, cur.df.file)
   
   return(result.df)
 }
-
-
-add_median_row <- function(df) {
-
-  numeric_columns <- sapply(df[, 2:(ncol(df) - 1)], is.numeric)
-  
-
-  medians <- round(apply(df[, 2:(ncol(df) - 1)][, numeric_columns], 2, median, na.rm = TRUE), 2)
-  
-
-  new_row <- rep(NA, ncol(df))
-  new_row[2:(ncol(df) - 1)][numeric_columns] <- medians
-  
-
-  new_row[ncol(df)] <- tail(df[, ncol(df)], n = 1)
-  
-
-  df <- rbind(df, new_row)
-  
-
-  rownames(df)[nrow(df)] <- "Median"
-  
-  return(df)
-}
-
-
-
 
 add_mean_row <- function(df) {
 
@@ -352,26 +324,15 @@ get.SAT.result.only.for.actionable.warning = function(all_eval_releases, SAT.res
   dataframes <- list(sum_SAT.result.df, sum_pure_NT.result.df, sum_pure_NFC.result.df, sum_SAT_NT.result.df, sum_SAT_NFC.result.df, sum_SAT_F.result.df)
   
 
-  dataframes.median = dataframes
   dataframes.mean = dataframes
   
-
-  dataframes_processed <- lapply(dataframes.median, add_median_row)
-  
-  last_rows <- lapply(dataframes_processed, function(df) df[nrow(df), ])
-  median.result <- do.call(rbind, last_rows)
-  row.names(median.result) <- paste0("df", 1:length(dataframes_processed))
-  
-  write.csv(median.result,"D:/Gitee-code/enhance_SATs/figures/(2024-10-19)RQ4_figures/RQ4_median_table.csv")
-  
-
   dataframes_processed <- lapply(dataframes.mean, add_mean_row)
   
   last_rows <- lapply(dataframes_processed, function(df) df[nrow(df), ])
   mean.result <- do.call(rbind, last_rows)
   row.names(mean.result) <- paste0("df", 1:length(dataframes_processed))
   
-  write.csv(mean.result,"D:/Gitee-code/enhance_SATs/figures/(2024-10-19)RQ4_figures/RQ4_mean_table.csv")
+  write.csv(mean.result,"./(2024-10-19)RQ4_figures/RQ4_mean_table.csv")
   
   print(paste0('finished ',SATname))
   
